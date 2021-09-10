@@ -76,7 +76,7 @@ export class Plugin extends CPlugin<IPushPluginConfig> {
       });
 
       self.onReturnableEvent(null, 'send', (resolve: any, reject: any, data): void => {
-        WebPush.sendNotification(data.subscription, data.data)
+        WebPush.sendNotification(data.subscription, JSON.stringify(data.data))
           .then(resolve)
           .catch(reject);
       });
