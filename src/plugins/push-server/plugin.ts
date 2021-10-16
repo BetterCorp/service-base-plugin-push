@@ -30,7 +30,7 @@ export class Plugin extends CPlugin<IPushPluginConfig> {
   clientFileBase!: string;
   init(): Promise<void> {
     const self = this;
-    return new Promise((resolve) => {
+    return new Promise(async (resolve) => {
       self.clientFileBase = join(self.cwd, 'content');
       if (!require('fs').existsSync(join(self.clientFileBase, 'WEB_PUSH')))
         self.clientFileBase = join(self.cwd, 'node_modules/@bettercorp/service-base-plugin-push/content');
@@ -47,21 +47,21 @@ export class Plugin extends CPlugin<IPushPluginConfig> {
       });
       self.log.info('USE JSON FOR EXPRESS');
       self.express.use(json({ limit: '5mb' }));
-      WebPush.setVapidDetails(`mailto:${ self.getPluginConfig().email }`, self.getPluginConfig().publicKey, self.getPluginConfig().privateKey);
+      WebPush.setVapidDetails(`mailto:${ (await self.getPluginConfig()).email }`, (await self.getPluginConfig()).publicKey, (await self.getPluginConfig()).privateKey);
 
-      self.express.get('/client.js', (req, res) => {
+      self.express.get('/client.js', async (req, res) => {
         self.log.debug(`GET: client.js`);
         res.setHeader('Content-Type', 'application/javascript');
         let varsToSend = {
-          publicKey: self.getPluginConfig().publicKey,
-          subscribeUrl: `${ self.getPluginConfig().host }/subscribe`,
-          serviceWorkerUrl: self.getPluginConfig().serviceWorkerJSPath,
+          publicKey: (await self.getPluginConfig()).publicKey,
+          subscribeUrl: `${ (await self.getPluginConfig()).host }/subscribe`,
+          serviceWorkerUrl: (await self.getPluginConfig()).serviceWorkerJSPath,
         };
         let contentToChange = readFileSync(join(self.clientFileBase, 'client.js')).toString().replace('{VARIABLES}', JSON.stringify(varsToSend));
         res.status(200).send(contentToChange);
       });
-      self.express.post('/subscribe', (req, res) => {
-        self.emitEvent(null, 'subscribe', req.body);
+      self.express.post('/subscribe', async (req, res) => {
+        await self.emitEvent(null, 'subscribe', req.body);
         const payload = JSON.stringify({
           action: 'SW_REGISTRATION_SUBSCRIPTION',
           data: true
@@ -70,12 +70,12 @@ export class Plugin extends CPlugin<IPushPluginConfig> {
           .catch(error => console.error(error));
         res.sendStatus(202);
       });
-      self.express.delete('/subscribe', (req, res) => {
-        self.emitEvent(null, 'unsubscribe', req.body);
+      self.express.delete('/subscribe', async (req, res) => {
+        await self.emitEvent(null, 'unsubscribe', req.body);
         res.sendStatus(202);
       });
 
-      self.onReturnableEvent(null, 'send', (resolve: any, reject: any, data): void => {
+      await self.onReturnableEvent(null, 'send', (resolve: any, reject: any, data): void => {
         WebPush.sendNotification(data.subscription, JSON.stringify(data.data))
           .then(resolve)
           .catch(reject);
@@ -95,9 +95,9 @@ export class Plugin extends CPlugin<IPushPluginConfig> {
   loadedIndex: number = Number.POSITIVE_INFINITY;
   loaded(): Promise<void> {
     const self = this;
-    return new Promise((resolve) => {
+    return new Promise(async (resolve) => {
       self.log.info(`Push server ready`);
-      self.log.info(`@ ${ self.getPluginConfig().host }/client.js`);
+      self.log.info(`@ ${ (await self.getPluginConfig()).host }/client.js`);
     });
   }
 }
