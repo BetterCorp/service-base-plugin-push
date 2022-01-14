@@ -1,7 +1,7 @@
 //import { Tools } from '@bettercorp/tools/lib/Tools';
 import * as WebPush from 'web-push';
 import { IPushPluginConfig } from './sec.config';
-import { CPlugin, CPluginClient } from '@bettercorp/service-base/lib/ILib';
+import { CPlugin, CPluginClient } from '@bettercorp/service-base/lib/interfaces/plugins';
 import { express } from '@bettercorp/service-base-plugin-web-server/lib/plugins/express/express';
 import { json } from 'express';
 import { readFileSync } from 'fs';
@@ -75,11 +75,11 @@ export class Plugin extends CPlugin<IPushPluginConfig> {
         res.sendStatus(202);
       });
 
-      await self.onReturnableEvent(null, 'send', (resolve: any, reject: any, data): void => {
+      await self.onReturnableEvent(null, 'send', (data): Promise<WebPush.SendResult> => new Promise((resolve, reject) => {
         WebPush.sendNotification(data.subscription, JSON.stringify(data.data))
           .then(resolve)
           .catch(reject);
-      });
+      }));
 
       /* const payload = JSON.stringify({
          title: 'Push notifications with Service Workers',
