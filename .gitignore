@@ -3,3 +3,7 @@ node_modules
 /sec.config.json
 /sub.json
 /sub2.json
+/node_modules
+/_exports
+/junit.xml
+/test-file-*
