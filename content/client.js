@@ -45,7 +45,7 @@ const isSubscribed = () => new Promise(async (resolve, reject) => {
   let sub = await getSubscription();
   resolve(sub !== null);
 });
-const subscribe = (token = null) => new Promise(async (resolve, reject) => {
+const subscribe = (token = null, extraHeaders) => new Promise(async (resolve, reject) => {
   if (await isSubscribed()) return resolve();
   let swRegistration = await registerServiceWorker()
   const subscription = await swRegistration.pushManager.subscribe({
@@ -61,12 +61,13 @@ const subscribe = (token = null) => new Promise(async (resolve, reject) => {
     }),
     headers: {
       'Content-Type': 'application/json',
+      ...(extraHeaders || {})
     },
   });
 
   resolve();
 });
-const unSubscribe = (token = null) => new Promise(async (resolve, reject) => {
+const unSubscribe = (token = null, extraHeaders) => new Promise(async (resolve, reject) => {
   if (!await isSubscribed()) return resolve();
   let sub = await getSubscription();
   if (sub !== null) {
@@ -78,6 +79,7 @@ const unSubscribe = (token = null) => new Promise(async (resolve, reject) => {
       }),
       headers: {
         'Content-Type': 'application/json',
+        ...(extraHeaders || {})
       },
     }).then(() => sub.unsubscribe().then(resolve).catch(reject));
   }
