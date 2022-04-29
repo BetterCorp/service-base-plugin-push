@@ -27,7 +27,7 @@ export class Plugin extends CPlugin<IPushPluginConfig> {
           serviceWorkerUrl: (await self.getPluginConfig()).serviceWorkerJSPath,
         };
         let contentToChange = readFileSync(join(self.clientFileBase, 'client.js')).toString().replace('{VARIABLES}', JSON.stringify(varsToSend));
-        res.status(200).send(contentToChange);
+        res.header('content-type', 'application/javascript').status(200).send(contentToChange);
       });
       self.fastify.post('/subscribe', async (req, res) => {
         await self.emitEvent<subscriptionRequest>(null, 'subscribe', {
