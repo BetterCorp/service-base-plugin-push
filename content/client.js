@@ -91,11 +91,11 @@ const unSubscribe = (token = null, extraHeaders) => new Promise(async (resolve, 
   }
   resolve();
 });
-const sendData = (event, data) => new Promise(async (resolve) => {
+const sendData = (action, data) => new Promise(async (resolve) => {
   const swReg = await _getRegistration();
   if (swReg === false) return resolve(false);
   swReg.active.postMessage(JSON.stringify({
-    event: event,
+    action: action,
     data: data
   }));
   resolve(true);
