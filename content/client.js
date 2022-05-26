@@ -102,13 +102,13 @@ const sendData = (event, data) => new Promise(async (resolve) => {
 });
 
 window.bsb = window.bsb || {};
+window.bsb.sendData = sendData;
 window.bsb.push = window.bsb.push || {};
 window.bsb.push.isAvailable = isAvailable;
 window.bsb.push.isRegistered = isRegistered;
 window.bsb.push.isSubscribed = isSubscribed;
 window.bsb.push.unSubscribe = unSubscribe;
 window.bsb.push.subscribe = subscribe;
-window.bsb.push.sendData = sendData;
 
 console.log('SW Ready');
 isRegistered().then((x) => console.log('SW ' + (x ? 'Active' : 'Not Active'))).catch(() => console.log('SW Error'));
