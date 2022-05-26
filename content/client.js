@@ -32,12 +32,18 @@ const getSubscription = () => new Promise(async (resolve, reject) => {
   let sub = await swRegistration.pushManager.getSubscription();
   resolve(sub);
 });
-const isRegistered = () => new Promise(async (resolve, reject) => {
+const _getRegistration = () => new Promise(async (resolve, reject) => {
   if (!isAvailable()) return resolve(false);
   let swRegistration = await registerServiceWorker();
   if (swRegistration === undefined || swRegistration === null) return resolve(false);
   if (swRegistration.active === undefined || swRegistration.active === null) return resolve(false);
   if (swRegistration.active.state !== 'activated') return resolve(false);
+  return resolve(swRegistration)
+});
+const isRegistered = () => new Promise(async (resolve, reject) => {
+  if (!isAvailable()) return resolve(false);
+  let swRegistration = await _getRegistration();
+  if (swRegistration === false) return resolve(false);
   return resolve(true)
 });
 const isSubscribed = () => new Promise(async (resolve, reject) => {
@@ -85,6 +91,15 @@ const unSubscribe = (token = null, extraHeaders) => new Promise(async (resolve, 
   }
   resolve();
 });
+const sendData = (event, data) => new Promise(async (resolve) => {
+  const swReg = await _getRegistration();
+  if (swReg === false) return resolve(false);
+  swReg.active.postMessage(JSON.stringify({
+    event: event,
+    data: data
+  }));
+  resolve(true);
+});
 
 window.bsb = window.bsb || {};
 window.bsb.push = window.bsb.push || {};
@@ -93,6 +108,7 @@ window.bsb.push.isRegistered = isRegistered;
 window.bsb.push.isSubscribed = isSubscribed;
 window.bsb.push.unSubscribe = unSubscribe;
 window.bsb.push.subscribe = subscribe;
+window.bsb.push.sendData = sendData;
 
 console.log('SW Ready');
 isRegistered().then((x) => console.log('SW ' + (x ? 'Active' : 'Not Active'))).catch(() => console.log('SW Error'));

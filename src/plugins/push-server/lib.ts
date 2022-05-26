@@ -5,6 +5,7 @@ export interface subscriptionRequest {
   subscription: PushSubscription;
   token: any | null;
   headers: FastifyHeadersWithIP;
+  meta?: any;
 }
 
 export interface IWebPushData<T = any> {
