@@ -16,4 +16,5 @@ self.addEventListener('message', event => {
     return;
   }
 });
+
 self.skipWaiting();
